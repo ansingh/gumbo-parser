@@ -86,10 +86,10 @@ typedef struct GumboInternalDuplicateAttrError {
 
   // The (0-based) index within the attributes vector of the original
   // occurrence.
-  unsigned int original_index;
+  size_t original_index;
 
   // The (0-based) index where the new occurrence would be.
-  unsigned int new_index;
+  size_t new_index;
 } GumboDuplicateAttrError;
 
 // A simplified representation of the tokenizer state, designed to be more

@@ -65,9 +65,9 @@ extern "C" {
  * particular column on a printable display, which nowadays is usually UTF-8.
  */
 typedef struct {
-  unsigned int line;
-  unsigned int column;
-  unsigned int offset;
+  size_t line;
+  size_t column;
+  size_t offset;
 } GumboSourcePosition;
 
 /**
@@ -126,10 +126,10 @@ typedef struct {
   void** data;
 
   /** Number of elements currently in the vector. */
-  unsigned int length;
+  size_t length;
 
   /** Current array capacity. */
-  unsigned int capacity;
+  size_t capacity;
 } GumboVector;
 
 /** An empty (0-length, 0-capacity) GumboVector. */
@@ -139,7 +139,7 @@ extern const GumboVector kGumboEmptyVector;
  * Returns the first index at which an element appears in this vector (testing
  * by pointer equality), or -1 if it never does.
  */
-int gumbo_vector_index_of(GumboVector* vector, const void* element);
+size_t gumbo_vector_index_of(GumboVector* vector, const void* element);
 
 /**
  * An enum for all the tags defined in the HTML5 standard.  These correspond to
@@ -202,7 +202,7 @@ const char* gumbo_normalize_svg_tagname(const GumboStringPiece* tagname);
  * enum. The `tag` version expects `tagname` to be NULL-terminated
  */
 GumboTag gumbo_tag_enum(const char* tagname);
-GumboTag gumbo_tagn_enum(const char* tagname, unsigned int length);
+GumboTag gumbo_tagn_enum(const char* tagname, size_t length);
 
 /**
  * Attribute namespaces.

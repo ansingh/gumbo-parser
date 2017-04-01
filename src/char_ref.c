@@ -13970,7 +13970,7 @@ static bool consume_named_ref(struct GumboInternalParser* parser,
 	int _slen;
 	int _trans;
 	const short *_acts;
-	unsigned int _nacts;
+	size_t _nacts;
 	const char *_keys;
 	const short *_inds;
 
@@ -13980,7 +13980,7 @@ static bool consume_named_ref(struct GumboInternalParser* parser,
 		goto _out;
 _resume:
 	_acts = _char_ref_actions + _char_ref_from_state_actions[cs];
-	_nacts = (unsigned int) *_acts++;
+	_nacts = (size_t) *_acts++;
 	while ( _nacts-- > 0 ) {
 		switch ( *_acts++ ) {
 	case 1:
@@ -14006,7 +14006,7 @@ _eof_trans:
 		goto _again;
 
 	_acts = _char_ref_actions + _char_ref_trans_actions[_trans];
-	_nacts = (unsigned int) *_acts++;
+	_nacts = (size_t) *_acts++;
 	while ( _nacts-- > 0 ) {
 		switch ( *(_acts++) )
 		{
@@ -22976,7 +22976,7 @@ _eof_trans:
 
 _again:
 	_acts = _char_ref_actions + _char_ref_to_state_actions[cs];
-	_nacts = (unsigned int) *_acts++;
+	_nacts = (size_t) *_acts++;
 	while ( _nacts-- > 0 ) {
 		switch ( *_acts++ ) {
 	case 0:
@@ -23009,7 +23009,7 @@ _again:
   if (cs >= 7623) {
     assert(output->first != kGumboNoChar);
     char last_char = *(te - 1);
-    int len = te - start;
+    size_t len = te - start;
     if (last_char == ';') {
       bool matched = utf8iterator_maybe_consume_match(input, start, len, true);
       assert(matched);

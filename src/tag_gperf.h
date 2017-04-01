@@ -1,5 +1,5 @@
-static unsigned int tag_hash(
-    register const char *str, register unsigned int len) {
+static size_t tag_hash(
+    const char *str, size_t len) {
   static unsigned short asso_values[] = {296, 296, 296, 296, 296, 296, 296, 296,
       296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296,
       296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296,
@@ -17,7 +17,7 @@ static unsigned int tag_hash(
       296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296,
       296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296,
       296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296, 296};
-  register unsigned int hval = len;
+  size_t hval = len;
 
   switch (hval) {
     default:
@@ -30,7 +30,7 @@ static unsigned int tag_hash(
   return hval + asso_values[(unsigned char) str[len - 1]];
 }
 
-static const unsigned char kGumboTagMap[] = {GUMBO_TAG_LAST, GUMBO_TAG_LAST,
+static const GumboTag kGumboTagMap[] = {GUMBO_TAG_LAST, GUMBO_TAG_LAST,
     GUMBO_TAG_LAST, GUMBO_TAG_S, GUMBO_TAG_H6, GUMBO_TAG_H5, GUMBO_TAG_H4,
     GUMBO_TAG_H3, GUMBO_TAG_SPACER, GUMBO_TAG_H2, GUMBO_TAG_HEADER,
     GUMBO_TAG_H1, GUMBO_TAG_HEAD, GUMBO_TAG_LAST, GUMBO_TAG_DETAILS,

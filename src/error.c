@@ -33,7 +33,7 @@
 static int print_message(
     GumboParser* parser, GumboStringBuffer* output, const char* format, ...) {
   va_list args;
-  int remaining_capacity = output->capacity - output->length;
+  size_t remaining_capacity = output->capacity - output->length;
   va_start(args, format);
   int bytes_written = vsnprintf(
       output->data + output->length, remaining_capacity, format, args);
@@ -75,11 +75,11 @@ static int print_message(
 static void print_tag_stack(GumboParser* parser, const GumboParserError* error,
     GumboStringBuffer* output) {
   print_message(parser, output, "  Currently open tags: ");
-  for (unsigned int i = 0; i < error->tag_stack.length; ++i) {
+  for (size_t i = 0; i < error->tag_stack.length; ++i) {
     if (i) {
       print_message(parser, output, ", ");
     }
-    GumboTag tag = (GumboTag) error->tag_stack.data[i];
+    GumboTag tag = (GumboTag) (long long)error->tag_stack.data[i];
     print_message(parser, output, gumbo_normalized_tagname(tag));
   }
   gumbo_string_buffer_append_codepoint(parser, '.', output);
@@ -156,10 +156,10 @@ static const char* find_next_newline(
 
 GumboError* gumbo_add_error(GumboParser* parser) {
   int max_errors = parser->_options->max_errors;
-  if (max_errors >= 0 && parser->_output->errors.length >= (unsigned int) max_errors) {
+  if (max_errors >= 0 && parser->_output->errors.length >= (size_t) max_errors) {
     return NULL;
   }
-  GumboError* error = gumbo_parser_allocate(parser, sizeof(GumboError));
+  GumboError* error = (GumboError*)gumbo_parser_allocate(parser, sizeof(GumboError));
   gumbo_vector_add(parser, error, &parser->_output->errors);
   return error;
 }
@@ -241,7 +241,7 @@ void gumbo_caret_diagnostic_to_string(GumboParser* parser,
   gumbo_string_buffer_append_codepoint(parser, '\n', output);
   gumbo_string_buffer_reserve(
       parser, output->length + error->position.column, output);
-  int num_spaces = error->position.column - 1;
+  size_t num_spaces = error->position.column - 1;
   memset(output->data + output->length, ' ', num_spaces);
   output->length += num_spaces;
   gumbo_string_buffer_append_codepoint(parser, '^', output);
@@ -272,8 +272,8 @@ void gumbo_init_errors(GumboParser* parser) {
 }
 
 void gumbo_destroy_errors(GumboParser* parser) {
-  for (unsigned int i = 0; i < parser->_output->errors.length; ++i) {
-    gumbo_error_destroy(parser, parser->_output->errors.data[i]);
+  for (size_t i = 0; i < parser->_output->errors.length; ++i) {
+    gumbo_error_destroy(parser, (GumboError*)parser->_output->errors.data[i]);
   }
   gumbo_vector_destroy(parser, &parser->_output->errors);
 }
