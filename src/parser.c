@@ -2349,13 +2349,52 @@ static bool handle_after_head(GumboParser* parser, GumboToken* token) {
   }
 }
 
-static void destroy_node(GumboParser* parser, GumboNode* node) {
+typedef void (*TreeTraversalCallback)(GumboParser* parser, GumboNode* node);
+
+static void tree_traverse(GumboParser* parser, GumboNode* node, TreeTraversalCallback callback) {
+  GumboNode* current_node = node;
+  unsigned long offset = 0;
+
+tailcall:
+  switch (current_node->type) {
+    case GUMBO_NODE_DOCUMENT:
+    case GUMBO_NODE_TEMPLATE:
+    case GUMBO_NODE_ELEMENT: {
+      GumboVector* children = (current_node->type == GUMBO_NODE_DOCUMENT)
+        ? &current_node->v.document.children
+        : &current_node->v.element.children
+      ;
+      if (offset >= children->length) {
+        assert(offset == children->length);
+        break;
+      } else {
+        current_node = (GumboNode *)children->data[offset];
+        offset = 0;
+        goto tailcall;
+      }
+    }
+    case GUMBO_NODE_TEXT:
+    case GUMBO_NODE_CDATA:
+    case GUMBO_NODE_COMMENT:
+    case GUMBO_NODE_WHITESPACE:
+      assert(offset == 0);
+      break;
+  }
+
+  offset = current_node->index_within_parent + 1;
+  GumboNode* next_node = current_node->parent;
+  callback(parser, current_node);
+  if (current_node == node) {
+    return;
+  }
+  current_node = next_node;
+  goto tailcall;
+}
+
+static void destroy_node_callback(GumboParser* parser, GumboNode* node) {
   switch (node->type) {
     case GUMBO_NODE_DOCUMENT: {
       GumboDocument* doc = &node->v.document;
-      for (size_t i = 0; i < doc->children.length; ++i) {
-        destroy_node(parser, (GumboNode *)doc->children.data[i]);
-      }
       gumbo_parser_deallocate(parser, (void*) doc->children.data);
       gumbo_parser_deallocate(parser, (void*) doc->name);
       gumbo_parser_deallocate(parser, (void*) doc->public_identifier);
@@ -2367,9 +2406,6 @@ static void destroy_node(GumboParser* parser, GumboNode* node) {
         gumbo_destroy_attribute(parser, (GumboAttribute*)node->v.element.attributes.data[i]);
       }
       gumbo_parser_deallocate(parser, node->v.element.attributes.data);
-      for (size_t i = 0; i < node->v.element.children.length; ++i) {
-        destroy_node(parser, (GumboNode *)node->v.element.children.data[i]);
-      }
       gumbo_parser_deallocate(parser, node->v.element.children.data);
       break;
     case GUMBO_NODE_TEXT:
@@ -2380,6 +2416,10 @@ static void destroy_node(GumboParser* parser, GumboNode* node) {
       break;
   }
   gumbo_parser_deallocate(parser, node);
+}
+
+static void destroy_node(GumboParser* parser, GumboNode* node) {
+  tree_traverse(parser, node, &destroy_node_callback);
 }
 
 // http://www.whatwg.org/specs/web-apps/current-work/complete/tokenization.html#parsing-main-inbody
